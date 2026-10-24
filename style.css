@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
+
+body { 
+    font-family: 'Prompt', sans-serif; 
+    background-color: #f8fafc; 
+}
+
+/* ซ่อน Scrollbar สำหรับส่วน Modal แต่ยังเลื่อนได้ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+
+/* การตั้งค่าระบบปริ้น (Print Stylesheet) */
+@media print {
+    /* ซ่อนหน้าต่างเว็บปกติทั้งหมด */
+    body * {
+        visibility: hidden;
+    }
+    /* แสดงเฉพาะพื้นที่ใบปะหน้า */
+    #print-section, #print-section * {
+        visibility: visible;
+    }
+    #print-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+}
