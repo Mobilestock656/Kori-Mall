@@ -1,214 +1,128 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KORI Mall - Premium Hair Supply</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Prompt', sans-serif; background-color: #fafafa; color: #1a1a1a; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-    </style>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KORI Mall - Premium Hair Supply</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap'); body{font-family:'Prompt',sans-serif;background:#fafafa}</style>
 </head>
 <body>
 <div id="app" class="min-h-screen flex flex-col">
-    <!-- Header - ไม่มีไอคอนกรรไกรแล้ว -->
-    <nav class="bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-gray-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 md:h-20 items-center">
-            <div class="flex items-center gap-3 cursor-pointer" @click="selectedCategory=''; selectedBrand=''">
-                <!-- โลโก้ตัวหนังสือล้วน ไม่มีกรรไกร ไม่มีป้าย -20% OFF -->
-                <span class="font-black text-xl md:text-2xl tracking-[0.2em] uppercase">KORI MALL</span>
-            </div>
-            <div class="flex items-center gap-5">
-                <div v-if="lineProfile" @click="fetchHistory" class="flex items-center gap-2 cursor-pointer bg-gray-50 border hover:bg-gray-100 px-3 py-1.5 rounded-full">
-                    <img :src="lineProfile.pictureUrl" class="w-7 h-7 rounded-full"><span class="text-xs font-bold hidden md:block">ประวัติ</span>
-                </div>
-                <button @click="isCartOpen=true" class="relative"><i class="fa-solid fa-bag-shopping text-2xl"></i><span v-if="cartTotalQty>0" class="absolute -top-2 -right-2 bg-red-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">{{cartTotalQty}}</span></button>
-            </div>
-        </div>
-    </nav>
+<nav class="bg-white/90 backdrop-blur sticky top-0 z-40 border-b shadow-sm"><div class="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center"><span class="font-black text-xl tracking-[0.2em] cursor-pointer" @click="selectedCategory=''">KORI MALL</span><div class="flex items-center gap-3"><button v-if="!customer.phone && !lineProfile" @click="openLogin" class="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-full">เข้าสู่ระบบ</button><div v-else @click="fetchHistory" class="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full cursor-pointer"><img v-if="lineProfile" :src="lineProfile.pictureUrl" class="w-6 h-6 rounded-full"><i v-else class="fa-solid fa-user text-xs"></i><span class="text-xs font-bold">{{customer.name||customer.phone}}</span></div><button @click="isCartOpen=true" class="relative"><i class="fa-solid fa-bag-shopping text-xl"></i><span v-if="cartTotalQty>0" class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center">{{cartTotalQty}}</span></button></div></div></nav>
 
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 w-full flex flex-col md:flex-row gap-8">
-        <aside class="w-full md:w-64 shrink-0">
-            <div class="md:sticky top-28 space-y-6">
-                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider">หมวดหมู่สินค้า</h3>
-                <div class="flex md:flex-col gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                    <button @click="selectedCategory=''" :class="selectedCategory==''?'bg-black text-white shadow':'bg-white border text-gray-600'" class="px-4 py-2.5 rounded-full md:rounded-xl text-sm font-medium whitespace-nowrap w-full text-left">ทั้งหมด</button>
-                    <button v-for="cat in uniqueCategories" :key="cat" @click="selectedCategory=cat" :class="selectedCategory==cat?'bg-black text-white shadow':'bg-white border text-gray-600'" class="px-4 py-2.5 rounded-full md:rounded-xl text-sm font-medium whitespace-nowrap w-full text-left">{{cat}}</button>
-                </div>
-                <div class="hidden md:block pt-6 border-t">
-                    <h3 class="text-xs font-bold text-gray-400 uppercase mb-3">สถานะ</h3>
-                    <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" v-model="showPreorderOnly"> โชว์เฉพาะพรีออเดอร์</label>
-                </div>
-            </div>
-        </aside>
+<main class="max-w-7xl mx-auto px-4 py-6 flex flex-col md:flex-row gap-8 flex-1">
+<aside class="md:w-64"><div class="flex md:flex-col gap-2 overflow-x-auto"><button @click="selectedCategory=''" :class="selectedCategory==''?'bg-black text-white':'bg-white border'" class="px-4 py-2.5 rounded-full text-sm w-full text-left">ทั้งหมด</button><button v-for="cat in uniqueCategories" @click="selectedCategory=cat" :class="selectedCategory==cat?'bg-black text-white':'bg-white border'" class="px-4 py-2.5 rounded-full text-sm w-full text-left">{{cat}}</button></div></aside>
+<div class="flex-1"><div v-if="loading" class="text-center py-20"><i class="fa-solid fa-circle-notch fa-spin text-3xl"></i></div><div v-else class="grid grid-cols-2 md:grid-cols-4 gap-4"><div v-for="p in filteredProducts" @click="openModal(p)" class="bg-white rounded-2xl border overflow-hidden cursor-pointer"><div class="aspect-[4/5] bg-gray-50 relative"><img :src="p['รูป1']" class="w-full h-full object-cover"><div class="absolute top-2 left-2 flex flex-col gap-1"><span v-if="isPreorder(p)" class="bg-amber-500 text-white text-[10px] px-2 py-1 rounded-full">พรีออเดอร์</span><span v-if="hasPromo(p)" class="bg-red-500 text-white text-[10px] px-2 py-1 rounded-full">-{{getDiscount(p)}}%</span></div></div><div class="p-3"><h3 class="text-xs font-semibold line-clamp-2">{{p['Name']}}</h3><div class="mt-2"><span v-if="hasPromo(p)" class="font-bold text-red-600 text-sm">฿{{getPromo(p)}}</span><span v-else class="font-bold text-sm">฿{{getFull(p)}}</span></div></div></div></div></div>
+</main>
 
-        <div class="flex-1">
-            <div v-if="loading" class="flex flex-col items-center justify-center py-20 text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-4xl mb-3"></i>กำลังโหลดสินค้า...</div>
-            <div v-else>
-                <p class="text-sm text-gray-500 mb-4">พบ {{filteredProducts.length}} รายการ</p>
-                <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
-                    <div v-for="p in filteredProducts" :key="p['บาร์โค้ด']" @click="openModal(p)" class="group bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-xl transition flex flex-col cursor-pointer">
-                        <div class="aspect-[4/5] bg-gray-50 relative overflow-hidden">
-                            <img :src="p['รูป1'] || p['รูปภาพ']" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
-                            <!-- Badge -->
-                            <div class="absolute top-2 left-2 flex flex-col gap-1">
-                                <span v-if="isPreorder(p)" class="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">พรีออเดอร์</span>
-                                <span v-if="hasPromo(p)" class="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full">-{{getDiscount(p)}}%</span>
-                            </div>
-                            <!-- Button -->
-                            <div class="absolute inset-x-0 bottom-0 p-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition">
-                                <button v-if="canAdd(p)" @click.stop="addToCart(p)" :class="isPreorder(p)?'bg-amber-500 hover:bg-amber-600':'bg-black hover:bg-gray-900'" class="w-full text-white py-2 rounded-xl text-xs font-bold shadow-lg"><i class="fa-solid fa-cart-shopping mr-1"></i>{{ isPreorder(p) ? 'พรีออเดอร์' : 'ใส่ตะกร้า' }}</button>
-                                <button v-else disabled class="w-full bg-gray-200 text-gray-500 py-2 rounded-xl text-xs">สินค้าหมด</button>
-                            </div>
-                        </div>
-                        <div class="p-3 md:p-4 flex-1 flex flex-col">
-                            <h3 class="font-semibold text-xs md:text-sm line-clamp-2 mb-1">{{p['Name']}}</h3>
-                            <p class="text-[10px] text-gray-400 line-clamp-1 mb-2">{{p['รายละเอียด'] || p['รายละเอียดสินค้า'] || ''}}</p>
-                            <div class="mt-auto">
-                                <div v-if="hasPromo(p)" class="flex flex-wrap items-baseline gap-1.5">
-                                    <span class="font-bold text-red-600 text-sm">฿{{getPromo(p)}}</span>
-                                    <span class="text-xs line-through text-gray-400">฿{{getFull(p)}}</span>
-                                </div>
-                                <div v-else class="font-bold text-sm">฿{{getFull(p)}}</div>
-                                <p class="text-[10px] mt-1" :class="isPreorder(p)?'text-amber-600':'text-green-600'"><i class="fa-solid fa-box"></i> {{ isPreorder(p) ? 'พรีออเดอร์ได้' : 'คงเหลือ: ' + (p['Qty']||0) }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+<!-- LOGIN MODAL แบบ 2 ทาง -->
+<div v-if="isRegisterOpen" class="fixed inset-0 z-[80] bg-black/60 flex items-center justify-center p-4">
+<div class="bg-white rounded-3xl w-full max-w-sm overflow-hidden shadow-2xl">
+<div class="p-6 pb-2 text-center"><h2 class="font-bold text-xl">เข้าสู่ KORI MALL</h2><p class="text-xs text-gray-500 mt-1">เลือกวิธีเข้าสู่ระบบ</p></div>
 
-    <!-- Product Detail Modal -->
-    <div v-if="selectedProduct" class="fixed inset-0 z-[60] bg-black/50 flex items-end md:items-center justify-center md:p-6" @click.self="selectedProduct=null">
-        <div class="bg-white w-full md:max-w-4xl rounded-t-2xl md:rounded-2xl max-h-[92vh] overflow-y-auto flex flex-col md:flex-row">
-            <div class="md:w-1/2 p-4">
-                <img :src="activeImage" class="w-full aspect-square object-cover rounded-xl">
-                <div class="flex gap-2 mt-3 overflow-x-auto">
-                    <img v-for="im in productImages" :src="im" @click="activeImage=im" class="w-16 h-16 rounded-lg object-cover border-2 cursor-pointer" :class="activeImage==im?'border-black':''">
-                </div>
-                <video v-if="selectedProduct['วิดีโอ']" :src="selectedProduct['วิดีโอ']" controls class="w-full mt-4 rounded-xl"></video>
-            </div>
-            <div class="md:w-1/2 p-6 flex flex-col">
-                <div class="flex justify-between"><h2 class="font-bold text-lg">{{selectedProduct['Name']}}</h2><button @click="selectedProduct=null" class="text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button></div>
-                <div class="my-4">
-                    <div v-if="hasPromo(selectedProduct)" class="flex items-baseline gap-2">
-                        <span class="text-2xl font-bold text-red-600">฿{{getPromo(selectedProduct)}}</span>
-                        <span class="line-through text-gray-400">฿{{getFull(selectedProduct)}}</span>
-                        <span class="bg-red-50 text-red-600 text-xs px-2 py-1 rounded-full font-bold">ลด {{getDiscount(selectedProduct)}}%</span>
-                    </div>
-                    <div v-else class="text-2xl font-bold">฿{{getFull(selectedProduct)}}</div>
-                    <p class="text-xs mt-2" :class="isPreorder(selectedProduct)?'text-amber-600':'text-green-600'">{{ isPreorder(selectedProduct) ? '🔥 สินค้าพรีออเดอร์ รอ 3-7 วัน' : 'คงเหลือ: ' + (selectedProduct['Qty']||0) + ' ชิ้น' }}</p>
-                </div>
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <h4 class="font-bold text-sm mb-2">รายละเอียดสินค้า</h4>
-                    <p class="text-sm text-gray-600 whitespace-pre-line">{{selectedProduct['รายละเอียด'] || selectedProduct['รายละเอียดสินค้า'] || selectedProduct['Description'] || 'ไม่มีรายละเอียด'}}</p>
-                </div>
-                <button @click="addToCart(selectedProduct); selectedProduct=null" :disabled="!canAdd(selectedProduct)" :class="isPreorder(selectedProduct)?'bg-amber-500':'bg-black'" class="w-full mt-6 text-white py-3.5 rounded-xl font-bold disabled:bg-gray-300">{{ isPreorder(selectedProduct) ? 'พรีออเดอร์เลย' : 'เพิ่มลงตะกร้า' }}</button>
-            </div>
-        </div>
-    </div>
+<div class="p-6 space-y-3">
+<!-- ปุ่มเข้าไลน์ -->
+<button @click="loginWithLine" class="w-full bg-[#06C755] hover:bg-[#05b34c] text-white py-3.5 rounded-xl font-bold flex items-center justify-center gap-2"><i class="fa-brands fa-line text-xl"></i> เข้าสู่ระบบด้วย LINE</button>
+<div class="flex items-center gap-3 py-1"><div class="flex-1 h-px bg-gray-200"></div><span class="text-[10px] text-gray-400">หรือ</span><div class="flex-1 h-px bg-gray-200"></div></div>
 
-    <!-- Cart Drawer -->
-    <div v-if="isCartOpen" class="fixed inset-0 z-50 flex justify-end"><div class="absolute inset-0 bg-black/30" @click="isCartOpen=false"></div><div class="relative bg-white w-full max-w-md h-full flex flex-col p-6 overflow-y-auto">
-        <div class="flex justify-between mb-4"><h2 class="font-bold text-lg">ตะกร้า {{cartTotalQty}} ชิ้น</h2><button @click="isCartOpen=false"><i class="fa-solid fa-xmark text-xl"></i></button></div>
-        <div v-if="cart.length==0" class="text-center py-20 text-gray-400">ตะกร้าว่าง</div>
-        <div v-else class="flex-1">
-            <div v-for="(it,i) in cart" :key="i" class="flex gap-3 border-b py-3">
-                <img :src="it.product['รูป1']" class="w-16 h-16 rounded object-cover">
-                <div class="flex-1"><p class="text-sm font-medium line-clamp-2">{{it.product['Name']}} <span v-if="isPreorder(it.product)" class="text-amber-600 text-xs">(พรีออเดอร์)</span></p><p class="text-sm font-bold text-red-600">฿{{getPromo(it.product)}} <span class="line-through text-xs text-gray-400 font-normal" v-if="hasPromo(it.product)">฿{{getFull(it.product)}}</span></p><div class="flex items-center gap-2 mt-2"><button @click="it.qty>1?it.qty--:cart.splice(i,1)" class="w-7 h-7 border rounded">-</button><span class="text-sm w-6 text-center">{{it.qty}}</span><button @click="it.qty++" class="w-7 h-7 border rounded">+</button></div></div>
-            </div>
-            <div class="mt-6 space-y-2 border-t pt-4">
-                <div class="flex justify-between text-sm text-gray-500"><span>ราคาปกติ</span><span>฿{{cartFull}}</span></div>
-                <div class="flex justify-between text-sm text-red-500"><span>ส่วนลด</span><span>-฿{{cartFull-cartTotal}}</span></div>
-                <div class="flex justify-between font-bold text-lg"><span>รวมสุทธิ</span><span class="text-red-600">฿{{cartTotal}}</span></div>
-                <input v-model="customer.name" placeholder="ชื่อ-นามสกุล" class="w-full border p-3 rounded-xl mt-4 text-sm"><input v-model="customer.phone" placeholder="เบอร์โทร" class="w-full border p-3 rounded-xl mt-2 text-sm"><textarea v-model="customer.address" placeholder="ที่อยู่จัดส่ง" class="w-full border p-3 rounded-xl mt-2 text-sm"></textarea>
-                <div class="mt-3"><label class="text-xs font-bold">แนบสลิป</label><input type="file" @change="handleFileUpload" accept="image/*" class="w-full text-sm mt-1"></div>
-                <button @click="checkout" :disabled="isCheckingOut" class="w-full bg-black text-white py-3.5 rounded-xl font-bold mt-4">{{isCheckingOut?'กำลังส่ง...':'ยืนยันสั่งซื้อ'}}</button>
-            </div>
-        </div>
-    </div></div>
+<!-- ลงทะเบียนด้วยเบอร์ -->
+<div class="space-y-2">
+<input v-model="customer.name" placeholder="ชื่อ-นามสกุล *" class="w-full border p-3 rounded-xl text-sm">
+<input v-model="customer.phone" placeholder="เบอร์โทร *" class="w-full border p-3 rounded-xl text-sm">
+<input v-model="customer.address" placeholder="ที่อยู่จัดส่ง (ถ้ามี)" class="w-full border p-3 rounded-xl text-sm">
+<button @click="registerMember" :disabled="isRegistering" class="w-full bg-black text-white py-3.5 rounded-xl font-bold mt-2 disabled:bg-gray-400">{{isRegistering?'กำลังบันทึก...':'ลงทะเบียน / เข้าสู่ระบบด้วยเบอร์'}}</button>
+<p class="text-[10px] text-gray-400 text-center mt-2">ถ้าเคยสั่งซื้อแล้ว ใส่เบอร์เดิม ระบบจะดึงข้อมูลเก่าให้อัตโนมัติ<br>ข้อมูลจะไปลงคอลัมน์ I = LINE ID KORI Mall</p>
+</div>
+</div>
+<div class="bg-gray-50 p-3 text-center"><button @click="isRegisterOpen=false" class="text-xs text-gray-500">ปิด</button></div>
+</div>
 </div>
 
+<!-- CART + อื่นๆ เหมือนเดิม -->
+<div v-if="isCartOpen" class="fixed inset-0 z-50 flex justify-end"><div class="absolute inset-0 bg-black/30" @click="isCartOpen=false"></div><div class="relative bg-white w-full max-w-md h-full p-6 overflow-y-auto flex flex-col"><div class="flex justify-between mb-4"><h2 class="font-bold">ตะกร้า {{cartTotalQty}}</h2><button @click="isCartOpen=false"><i class="fa-solid fa-xmark"></i></button></div><div v-for="(it,i) in cart" class="flex gap-3 border-b py-3"><img :src="it.product['รูป1']" class="w-16 h-16 rounded"><div class="flex-1"><p class="text-sm line-clamp-2">{{it.product['Name']}}</p><div class="flex gap-2 mt-1"><button @click="it.qty>1?it.qty--:cart.splice(i,1)" class="w-7 h-7 border rounded">-</button><span class="w-6 text-center text-sm">{{it.qty}}</span><button @click="it.qty++" class="w-7 h-7 border rounded">+</button></div></div><span class="font-bold text-sm">฿{{getPromo(it.product)*it.qty}}</span></div><div class="mt-auto pt-4 border-t"><div class="flex justify-between font-bold text-lg"><span>รวม</span><span class="text-red-600">฿{{cartTotal}}</span></div><input v-model="customer.name" placeholder="ชื่อ" class="w-full border p-3 rounded-xl mt-3 text-sm"><input v-model="customer.phone" placeholder="เบอร์โทร" class="w-full border p-3 rounded-xl mt-2 text-sm"><textarea v-model="customer.address" placeholder="ที่อยู่" class="w-full border p-3 rounded-xl mt-2 text-sm"></textarea><input type="file" @change="handleFileUpload" accept="image/*" class="w-full text-xs mt-3"><button @click="checkout" :disabled="isCheckingOut" class="w-full bg-black text-white py-3.5 rounded-xl mt-3 font-bold">{{isCheckingOut?'กำลังส่ง...':'ยืนยันสั่งซื้อ'}}</button></div></div></div>
+
+<div v-if="selectedProduct" class="fixed inset-0 z-[60] bg-black/50 flex items-end md:items-center justify-center md:p-6" @click.self="selectedProduct=null"><div class="bg-white w-full md:max-w-2xl rounded-t-2xl md:rounded-2xl max-h-[90vh] overflow-y-auto p-6"><div class="flex justify-between"><h2 class="font-bold">{{selectedProduct['Name']}}</h2><button @click="selectedProduct=null"><i class="fa-solid fa-xmark"></i></button></div><img :src="selectedProduct['รูป1']" class="w-full aspect-square object-cover rounded-xl mt-4"><button @click="addToCart(selectedProduct);selectedProduct=null" class="w-full mt-4 bg-black text-white py-3 rounded-xl font-bold">ใส่ตะกร้า</button></div></div>
+
+<div v-if="isHistoryOpen" class="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"><div class="bg-white rounded-2xl p-6 w-full max-w-lg max-h-[80vh] overflow-y-auto"><div class="flex justify-between mb-4"><h2 class="font-bold">ประวัติ</h2><button @click="isHistoryOpen=false"><i class="fa-solid fa-xmark"></i></button></div><div v-for="o in orderHistory" class="border p-3 rounded-xl text-sm mb-2"><p class="font-bold">{{o.orderId}} <span class="text-[10px] bg-gray-100 px-2 py-1 rounded">{{o.source}}</span></p><p class="text-xs text-gray-500">{{o.date}} ฿{{o.total}} {{o.status}}</p><p class="text-xs">พัสดุ: {{o.tracking||'-'}}</p></div><p v-if="orderHistory.length==0" class="text-center text-gray-400 text-sm">ไม่พบประวัติ</p></div></div>
+
+</div>
 <script>
 const { createApp } = Vue;
 createApp({
-    data(){
-        return {
-            apiUrl: 'https://script.google.com/macros/s/AKfycbwjBeyslBymi8TfeLVcxX8B27rmnU8U74Hkxnl-R0BpP-77YRIoOZ1cjvvJ6Z4gB5e1Fw/exec',
-            liffId: '2009620851-63TYRClY',
-            products:[], loading:true, selectedCategory:'', selectedBrand:'', showPreorderOnly:false,
-            selectedProduct:null, activeImage:'', cart:[], isCartOpen:false, isCheckingOut:false,
-            customer:{name:'',phone:'',address:''}, slipBase64:'', lineProfile:null, isHistoryOpen:false, isLoadingHistory:false, orderHistory:[], isRegisterOpen:false, isRegistering:false,
-            PROMO:20
-        }
-    },
-    computed:{
-        uniqueCategories(){ let a=[]; this.products.forEach(p=>{ const r=p['หมวดหมู่เว็บ']||p['หมวดหมู่']||p['Category']||''; if(r) a.push(...String(r).split(',').map(s=>s.trim()).filter(Boolean)); }); return [...new Set(a)]; },
-        filteredProducts(){
-            let list=this.products;
-            if(this.selectedCategory) list=list.filter(p=> String(p['หมวดหมู่เว็บ']||'').split(',').map(s=>s.trim()).includes(this.selectedCategory));
-            if(this.showPreorderOnly) list=list.filter(p=> this.isPreorder(p));
-            return list;
-        },
-        cartTotal(){ return this.cart.reduce((t,i)=>t+this.getPromo(i.product)*i.qty,0); },
-        cartFull(){ return this.cart.reduce((t,i)=>t+this.getFull(i.product)*i.qty,0); },
-        cartTotalQty(){ return this.cart.reduce((t,i)=>t+i.qty,0); },
-        productImages(){ if(!this.selectedProduct) return []; let arr=[]; ['รูป1','รูป2','รูป3','รูป4','รูป5'].forEach(k=>{ if(this.selectedProduct[k]) arr.push(this.selectedProduct[k]); }); return arr; }
-    },
-    mounted(){
-        this.fetchProducts();
-        const saved=localStorage.getItem('mira_customer'); if(saved) try{ this.customer=JSON.parse(saved);}catch(e){}
-        // LIFF
-        (async()=>{
-            try{ await liff.init({liffId:this.liffId}); if(liff.isLoggedIn()){ this.lineProfile=await liff.getProfile(); const res=await fetch(`${this.apiUrl}?action=checkMember&lineId=${this.lineProfile.userId}`); const d=await res.json(); if(d.found){ this.customer.name=d.name; this.customer.phone=d.phone; this.customer.address=d.address; } else { this.isRegisterOpen=true; } } }catch(e){ console.log('LIFF skip',e); }
-        })();
-    },
-    methods:{
-        async fetchProducts(){ try{ const r=await fetch(`${this.apiUrl}?action=getProducts`); this.products=await r.json(); }catch(e){ alert('โหลดสินค้าไม่สำเร็จ'); } this.loading=false; },
-        getFull(p){
-            let full=Number(p['Price']||p['ราคาเต็ม']||p['ราคาขาย']||p['ราคา']||p['_fullPrice']||0);
-            let promo=Number(p['ราคาโปรโมชั่น']||p['_promoPrice']||0);
-            if(!full && promo) full=Math.round(promo/0.8);
-            return full||0;
-        },
-        getPromo(p){
-            let promo=Number(p['ราคาโปรโมชั่น']||p['_promoPrice']||0);
-            if(promo>0) return promo;
-            const full=this.getFull(p);
-            return full? Math.round(full*0.8) : 0;
-        },
-        hasPromo(p){ return this.getPromo(p) < this.getFull(p) && this.getFull(p)>0; },
-        getDiscount(p){ const f=this.getFull(p), pr=this.getPromo(p); if(!f) return 20; return Math.round((1-pr/f)*100); },
-        isPreorder(p){
-            const v=String(p['พรีออเดอร์']||p['PreOrder']||p['preorder']||'').toLowerCase().trim();
-            return v==='เปิด' || v==='yes' || v==='true' || v==='1' || v==='พรีออเดอร์';
-        },
-        canAdd(p){ const qty=Number(p['Qty']||p['คงเหลือ']||0); return qty>0 || this.isPreorder(p); },
-        openModal(p){ this.selectedProduct=p; this.activeImage=p['รูป1']||''; },
-        addToCart(product){
-            const key=product['บาร์โค้ด']||product['Barcode'];
-            const ex=this.cart.find(i=> (i.product['บาร์โค้ด']||i.product['Barcode'])==key);
-            if(ex) ex.qty++; else this.cart.push({product, qty:1});
-            this.isCartOpen=true;
-        },
-        handleFileUpload(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>this.slipBase64=ev.target.result; r.readAsDataURL(f); },
-        async registerMember(){ if(!this.customer.name||!this.customer.phone) return alert('กรอกข้อมูลให้ครบ'); this.isRegistering=true; try{ await fetch(this.apiUrl,{method:'POST', body:JSON.stringify({action:'registerMember', lineId:this.lineProfile?.userId||'WEB', name:this.customer.name, phone:this.customer.phone, address:this.customer.address}), headers:{'Content-Type':'text/plain;charset=utf-8'}}); this.isRegisterOpen=false; }catch(e){} this.isRegistering=false; },
-        async checkout(){
-            if(!this.customer.name||!this.customer.phone||!this.customer.address) return alert('กรอกข้อมูลให้ครบ');
-            if(!this.slipBase64) return alert('แนบสลิปก่อนครับ');
-            this.isCheckingOut=true; localStorage.setItem('mira_customer', JSON.stringify(this.customer));
-            const payload={ customerName:this.customer.name, phone:this.customer.phone, address:this.customer.address, items:this.cart.map(i=>`${i.product['Name']} x${i.qty} ${this.isPreorder(i.product)?'(พรีออเดอร์)':''} - ฿${this.getPromo(i.product)}`).join('\n'), totalAmount:this.cartTotal, slipBase64:this.slipBase64, cartData:this.cart.map(i=>({barcode:i.product['บาร์โค้ด']||i.product['Barcode'], qty:i.qty, preorder:this.isPreorder(i.product)})), lineUserId:this.lineProfile?.userId||'' };
-            try{ const res=await fetch(this.apiUrl,{method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'text/plain;charset=utf-8'}}); const j=await res.json(); if(j.success){ alert('สั่งซื้อสำเร็จ รหัส '+j.orderId); this.cart=[]; this.isCartOpen=false; this.slipBase64=''; this.fetchProducts(); } }catch(e){ alert('สั่งไม่สำเร็จ'); } this.isCheckingOut=false;
-        },
-        async fetchHistory(){ if(!this.lineProfile) return; this.isHistoryOpen=true; this.isLoadingHistory=true; try{ const r=await fetch(`${this.apiUrl}?action=getOrdersByLineId&lineId=${this.lineProfile.userId}`); this.orderHistory=await r.json(); }catch(e){} this.isLoadingHistory=false; }
-    }
+data(){ return {
+apiUrl: 'https://script.google.com/macros/s/AKfycbwjBeyslBymi8TfeLVcxX8B27rmnU8U74Hkxnl-R0BpP-77YRIoOZ1cjvvJ6Z4gB5e1Fw/exec',
+liffId: '2009620851-63TYRClY',
+products:[], loading:true, selectedCategory:'', showPreorderOnly:false,
+selectedProduct:null, activeImage:'', cart:[], isCartOpen:false, isCheckingOut:false,
+customer:{name:'',phone:'',address:''}, slipBase64:'', lineProfile:null,
+isHistoryOpen:false, isLoadingHistory:false, orderHistory:[],
+isRegisterOpen:false, isRegistering:false
+}},
+computed:{
+uniqueCategories(){ let a=[]; this.products.forEach(p=>{ const r=p['หมวดหมู่เว็บ']||''; if(r) a.push(...String(r).split(',').map(s=>s.trim()).filter(Boolean)); }); return [...new Set(a)]; },
+filteredProducts(){ let list=this.products; if(this.selectedCategory) list=list.filter(p=> String(p['หมวดหมู่เว็บ']||'').split(',').map(s=>s.trim()).includes(this.selectedCategory)); return list; },
+cartTotal(){ return this.cart.reduce((t,i)=>t+this.getPromo(i.product)*i.qty,0); },
+cartTotalQty(){ return this.cart.reduce((t,i)=>t+i.qty,0); },
+},
+mounted(){
+this.fetchProducts();
+const saved=localStorage.getItem('kori_customer')||localStorage.getItem('mira_customer'); if(saved) try{ this.customer=JSON.parse(saved);}catch(e){}
+(async()=>{
+try{ await liff.init({liffId:this.liffId}); if(liff.isLoggedIn()){ this.lineProfile=await liff.getProfile(); const res=await fetch(`${this.apiUrl}?action=checkMember&lineId=${this.lineProfile.userId}&phone=${this.customer.phone||''}`); const d=await res.json(); if(d.found){ this.customer.name=d.name; this.customer.phone=d.phone; this.customer.address=d.address||this.customer.address; localStorage.setItem('kori_customer', JSON.stringify(this.customer)); this.isRegisterOpen=false; } else { if(!this.customer.phone) this.isRegisterOpen=true; } } }catch(e){ console.log('LIFF skip',e); }
+})();
+},
+methods:{
+openLogin(){ this.isRegisterOpen=true; },
+async loginWithLine(){
+try{ 
+if(!liff.isLoggedIn()){ liff.login(); return; }
+this.lineProfile=await liff.getProfile();
+alert('เข้าสู่ระบบ LINE สำเร็จ: '+this.lineProfile.displayName);
+const res=await fetch(`${this.apiUrl}?action=checkMember&lineId=${this.lineProfile.userId}`);
+const d=await res.json();
+if(d.found){ this.customer.name=d.name; this.customer.phone=d.phone; this.customer.address=d.address; localStorage.setItem('kori_customer', JSON.stringify(this.customer)); this.isRegisterOpen=false; }
+else { // ยังไม่เคยลงทะเบียน ให้กรอกเบอร์เพิ่ม
+this.$nextTick(()=>{ document.querySelector('input[placeholder*="เบอร์โทร"]')?.focus(); });
+}
+}catch(e){ 
+// ถ้าเปิดนอก LINE จะ login ไม่ได้ ให้แจ้ง
+alert('การเข้าสู่ระบบด้วย LINE ต้องเปิดผ่านแอป LINE หรือเปิดเว็บ https://liff.line.me/2009620851-63TYRClY เท่านั้นครับ\n\nถ้าเปิดจากเครื่องคอม ให้ใช้การลงทะเบียนด้วยเบอร์โทรด้านล่างแทนได้เลย');
+}
+},
+async fetchProducts(){ try{ const r=await fetch(`${this.apiUrl}?action=getProducts`); this.products=await r.json(); }catch(e){ console.log(e); } this.loading=false; },
+getFull(p){ let f=Number(p['ราคาเต็ม']||p['_fullPrice']||0); let pr=Number(p['ราคาโปรโมชั่น']||p['_promoPrice']||0); if(!f&&pr) f=Math.round(pr/0.8); return f||0; },
+getPromo(p){ let pr=Number(p['ราคาโปรโมชั่น']||p['_promoPrice']||0); if(pr>0) return pr; const f=this.getFull(p); return f?Math.round(f*0.8):0; },
+hasPromo(p){ return this.getPromo(p) < this.getFull(p) && this.getFull(p)>0; },
+getDiscount(p){ const f=this.getFull(p), pr=this.getPromo(p); if(!f) return 20; return Math.round((1-pr/f)*100); },
+isPreorder(p){ const v=String(p['พรีออเดอร์']||p['_isPreorder']||'').toLowerCase(); return v==='เปิด'||p['_isPreorder']===true; },
+canAdd(p){ return true; },
+openModal(p){ this.selectedProduct=p; },
+addToCart(product){ const ex=this.cart.find(i=> (i.product['บาร์โค้ด']||i.product['Barcode'])==product['บาร์โค้ด']); if(ex) ex.qty++; else this.cart.push({product, qty:1}); this.isCartOpen=true; },
+handleFileUpload(e){ const f=e.target.files[0]; if(!f) return; const r=new FileReader(); r.onload=ev=>this.slipBase64=ev.target.result; r.readAsDataURL(f); },
+async registerMember(){
+if(!this.customer.name||!this.customer.phone) return alert('กรอกชื่อกับเบอร์ให้ครบครับ');
+this.isRegistering=true;
+try{
+const payload={action:'registerMember', lineId:this.lineProfile?.userId||'', phone:this.customer.phone, name:this.customer.name, address:this.customer.address};
+const res=await fetch(this.apiUrl,{method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'text/plain;charset=utf-8'}});
+const j=await res.json();
+if(j.success){ localStorage.setItem('kori_customer', JSON.stringify(this.customer)); this.isRegisterOpen=false; alert('เข้าสู่ระบบสำเร็จ จะบันทึก LINE ID KORI ลงคอลัมน์ I ให้อัตโนมัติ'); }
+else alert('ไม่สำเร็จ: '+(j.error||''));
+}catch(e){ alert('สมัครไม่สำเร็จ เช็ค API URL หรือ Deploy ใหม่'); console.error(e); }
+this.isRegistering=false;
+},
+async checkout(){
+if(!this.customer.name||!this.customer.phone||!this.customer.address) return alert('กรอกให้ครบ');
+if(!this.slipBase64) return alert('แนบสลิป');
+this.isCheckingOut=true; localStorage.setItem('kori_customer', JSON.stringify(this.customer));
+const payload={customerName:this.customer.name, phone:this.customer.phone, address:this.customer.address, items:this.cart.map(i=>`${i.product['Name']} x${i.qty}`).join('\n'), totalAmount:this.cartTotal, slipBase64:this.slipBase64, cartData:this.cart.map(i=>({barcode:i.product['บาร์โค้ด'], qty:i.qty})), lineUserId:this.lineProfile?.userId||'', lineUserIdKori:this.lineProfile?.userId||'', source:'KORI Mall'};
+try{ const res=await fetch(this.apiUrl,{method:'POST', body:JSON.stringify(payload), headers:{'Content-Type':'text/plain;charset=utf-8'}}); const j=await res.json(); if(j.success){ alert('สั่งสำเร็จ '+j.orderId); this.cart=[]; this.isCartOpen=false; this.slipBase64=''; } }catch(e){ alert('สั่งไม่สำเร็จ'); } this.isCheckingOut=false;
+},
+async fetchHistory(){ this.isHistoryOpen=true; this.isLoadingHistory=true; try{ const r=await fetch(`${this.apiUrl}?action=getOrdersByLineId&lineId=${this.lineProfile?.userId||''}&phone=${this.customer.phone||''}`); this.orderHistory=await r.json(); }catch(e){} this.isLoadingHistory=false; }
+}
 }).mount('#app');
 </script>
 </body>
